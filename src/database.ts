@@ -16,7 +16,6 @@ export class ReceiptDatabase {
 
   public async insertReceipt (receipt: Receipt): Promise<void> {
     this.receipts.set(receipt.getId(), receipt)
-    console.log(ReceiptDatabase.db)
   }
 
   public async deleteReceipt (id: UUID): Promise<void> {

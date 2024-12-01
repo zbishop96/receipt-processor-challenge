@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UUID } from 'crypto';
-import { ReceiptDatabase } from 'src/database';
-import Receipt from 'src/Receipt';
+import { ReceiptDatabase } from '../database';
+import Receipt from '../Receipt';
 
 @Injectable()
 export class ReceiptsService {
