@@ -25,8 +25,4 @@ export class ReceiptDatabase {
   public async getReceipt (id: UUID): Promise<Receipt | undefined> {
     return this.receipts.get(id)
   }
-
-  public async dropDatabase (): Promise<void> {
-    this.receipts = new Map<UUID, Receipt>()
-  }
 }

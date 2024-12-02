@@ -1,85 +1,81 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Receipt Processor
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A basic backend API for processing reward points on receipt data. Receipts are submitted and if valid, persist to an in-memory database.
+Points are calculated at submission and stored with the receipt.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Setup
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+Build the container with:
+```
+docker build -t receipt-processor .
 ```
 
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+and start it with:
+```
+docker run -p 3000:3000 receipt-processor
 ```
 
-## Run tests
+This starts the service on port 3000 of the container and maps it to your local port 3000.
 
-```bash
-# unit tests
-$ npm run test
+### Endpoint: Process Receipts
 
-# e2e tests
-$ npm run test:e2e
+* Path: `/receipts/process`
+* Method: `POST`
+* Payload: Receipt JSON
+* Response: JSON containing an id for the receipt.
 
-# test coverage
-$ npm run test:cov
+Description:
+
+The ID returned is the ID that should be passed into `/receipts/{id}/points` to get the number of points the receipt
+was awarded. An invalid receipt returns a status code of 400. The body includes the submitted receipt and the Zod error message
+that details the issue in schema validation.
+
+Example Response:
+```json
+{ "id": "7fb1377b-b223-49d9-a31a-5a02701dd310" }
 ```
 
-## Resources
+Example Error Response:
+```json
+{ "receipt": { ... }, "error": { ... } }
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Endpoint: Get Points
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+* Path: `/receipts/{id}/points`
+* Method: `GET`
+* Response: A JSON object containing the number of points awarded.
 
-## Support
+A simple Getter endpoint that looks up the receipt by the ID and returns an object specifying the points awarded. If the
+specified ID does not exist, the ID is returned with a status code of 404.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Example Response:
+```json
+{ "points": 32 }
+```
+Example Error Response:
+```json
+{ "id": "8759a05f-fb93-49fb-b53e-54e08917ca45" }
+```
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Design Decisions
 
-## License
+I chose NestJS as my framework because it is more aimed at backend / api development than many of the other JS frameworks.
+Nest's documentation is fairly easy to follow and the routing is incredible simple. Nest is also OOP-leaning which in this
+case worked well.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+I chose to calculate the points for a receipt on submission rather than retrieval for a couple reasons. First, the points
+are static per receipt. There's currently no way for the receipt data to change which would affect the points calculated.
+This meant I can calculate the points once and store them with the receipt instead of calculating them every time they are
+requested. Secondly, if this needed to scale to a significant amount of traffic, it would be possible to modify the current
+process so that calculations are done separate from the request. The user would submit a receipt, it would be validated and
+stored, and the user would get a 201 response. The receipt would then be added to a queue for another service to calculate
+points and add that to the db entry.
+
+While usually unnecessary for small projects / assessments like this, I chose to add Zod, an npm package for typescript that
+does runtime schema validation. It makes it significantly easier to ensure the data submitted to an API endpoint is the right
+form. It also allows for constraints on properties and types so that I can ensure a receipt actually has items or that the retailer
+is not an empty string.
+
